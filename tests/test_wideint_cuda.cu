@@ -142,6 +142,26 @@ __global__ void run_wideint_cuda_tests(int *failures) {
     expect(wideint::has_single_bit(i128{1}), failures);
 }
 
+int run_wideint_cuda_host_tests() {
+    const u128 one{1u};
+    const u128 top_bit{0u, 1u};
+    const u128 sum = top_bit + one;
+
+    if (sum != u128{1u, 1u}) {
+        return 1;
+    }
+    if (wideint::bit_width(sum) != 65) {
+        return 2;
+    }
+    if (!wideint::has_single_bit(top_bit)) {
+        return 3;
+    }
+    if (wideint::countr_zero(top_bit) != 64) {
+        return 4;
+    }
+    return 0;
+}
+
 void check_cuda(cudaError_t status) {
     assert(status == cudaSuccess);
 }
@@ -151,6 +171,9 @@ void check_cuda(cudaError_t status) {
 int main() {
     int failures = 0;
     int *device_failures = nullptr;
+    const int host_failures = run_wideint_cuda_host_tests();
+
+    assert(host_failures == 0);
 
     check_cuda(cudaMalloc(&device_failures, sizeof(int)));
     check_cuda(cudaMemcpy(device_failures, &failures, sizeof(int), cudaMemcpyHostToDevice));

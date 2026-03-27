@@ -4,7 +4,7 @@
 #pragma once
 
 #if defined(__CUDACC__)
-#define WIDEINT_HD __device__
+#define WIDEINT_HD __device__ __host__
 #else
 #define WIDEINT_HD
 #endif

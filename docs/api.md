@@ -9,6 +9,7 @@ The public API is intentionally small:
 - unsigned integers via `wideint::uint<N>`
 - signed integers via `wideint::sint<N>`
 - integer-like arithmetic, bitwise operations, shifts, comparisons, and explicit integer conversions
+- mixed arithmetic, bitwise, and comparison operators with built-in integer types
 - bit utilities via `wideint::countl_zero`, `wideint::countr_zero`, `wideint::popcount`, `wideint::bit_width`, and `wideint::has_single_bit`
 
 `N` is the number of 64-bit limbs, so the total width is `64 * N` bits.
@@ -95,6 +96,7 @@ Notes:
 
 - the low limb receives the source value
 - signed negative inputs are sign-extended across the remaining limbs
+- these constructors also support mixed expressions such as `x + 1`, `1 + x`, `x == 0`, and `0 == x`
 
 ### From Limb Values
 
@@ -148,6 +150,7 @@ Semantics:
 - arithmetic wraps modulo `2^(64 * N)`
 - multiplication is truncated to `N` limbs
 - signed and unsigned types share the same wrapped bit-level arithmetic
+- mixed expressions with built-in integers are supported on either side for the non-member operators
 
 Example:
 
@@ -157,6 +160,7 @@ using u128 = wideint::uint<2>;
 u128 all_ones{~0ull, ~0ull};
 u128 one{1u};
 u128 sum = all_ones + one; // wraps to zero
+u128 also_sum = 1u + all_ones; // same wrapped result
 ```
 
 ## Bitwise Operators
@@ -170,6 +174,7 @@ Supported bitwise operators:
 - non-member `&`, `|`, `^`
 
 These operate independently on each limb.
+Mixed expressions with built-in integers are supported for the non-member operators on either side.
 
 ## Shift Operators
 
@@ -256,6 +261,18 @@ Semantics:
 
 - unsigned comparisons are lexicographic from the most-significant limb
 - signed comparisons first consider the sign bit of the top limb, then compare by limb value
+- mixed comparisons with built-in integers are supported on either side
+
+Example:
+
+```cpp
+wideint::sint<2> x{24};
+
+bool a = (x == 24);
+bool b = (24 == x);
+bool c = (x > 20);
+bool d = (20 < x);
+```
 
 ## Boolean Conversion
 
@@ -279,6 +296,7 @@ Low-level helpers in `detail/platform_ops.hpp` select different implementations 
 
 At the API level, the public integer semantics remain the same.
 The bit utilities in `wideint/bit.hpp` follow the same value semantics on host and CUDA builds.
+The mixed operators with built-in integers are also covered by both host and CUDA tests in this repository.
 
 ## Current Limitations
 

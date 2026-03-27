@@ -74,6 +74,36 @@ __global__ void run_wideint_cuda_tests(int *failures) {
     expect(offsetof(u128, limbs) == 0, failures);
     expect(offsetof(i128, limbs) == 0, failures);
 
+    i128 mixed{5};
+    mixed = mixed + 1;
+    expect(mixed == 6, failures);
+    mixed = 1 + mixed;
+    expect(mixed == 7, failures);
+    mixed = mixed - 2;
+    expect(mixed == 5, failures);
+    mixed = 9 - mixed;
+    expect(mixed == 4, failures);
+    mixed = mixed * 3;
+    expect(mixed == 12, failures);
+    mixed = 2 * mixed;
+    expect(mixed == 24, failures);
+    expect(mixed == 24, failures);
+    expect(24 == mixed, failures);
+    expect(mixed != 23, failures);
+    expect(23 != mixed, failures);
+    expect(mixed > 20, failures);
+    expect(20 < mixed, failures);
+    expect(mixed >= 24, failures);
+    expect(24 <= mixed, failures);
+
+    u128 mask{6u};
+    expect((mask & 3u) == u128{2u}, failures);
+    expect((3u & mask) == u128{2u}, failures);
+    expect((mask | 1u) == u128{7u}, failures);
+    expect((1u | mask) == u128{7u}, failures);
+    expect((mask ^ 3u) == u128{5u}, failures);
+    expect((3u ^ mask) == u128{5u}, failures);
+
     expect(wideint::countl_zero(std::uint64_t{0}) == 64, failures);
     expect(wideint::countr_zero(std::uint64_t{0}) == 64, failures);
     expect(wideint::popcount(std::uint64_t{0}) == 0, failures);

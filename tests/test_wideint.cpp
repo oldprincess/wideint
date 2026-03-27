@@ -80,6 +80,49 @@ int main() {
     assert(static_cast<std::uint64_t>(i128{-1}) == ~0ull);
     assert(static_cast<std::int64_t>(i128{-1}) == -1);
 
+    static_assert(std::is_same_v<decltype(i128{1} + 1), i128>);
+    static_assert(std::is_same_v<decltype(1 + i128{1}), i128>);
+    static_assert(std::is_same_v<decltype(i128{4} - 3), i128>);
+    static_assert(std::is_same_v<decltype(4 - i128{3}), i128>);
+    static_assert(std::is_same_v<decltype(i128{4} * 3), i128>);
+    static_assert(std::is_same_v<decltype(3 * i128{4}), i128>);
+    static_assert(std::is_same_v<decltype(u128{7} & 3u), u128>);
+    static_assert(std::is_same_v<decltype(3u & u128{7}), u128>);
+    static_assert(std::is_same_v<decltype(u128{7} | 3u), u128>);
+    static_assert(std::is_same_v<decltype(3u | u128{7}), u128>);
+    static_assert(std::is_same_v<decltype(u128{7} ^ 3u), u128>);
+    static_assert(std::is_same_v<decltype(3u ^ u128{7}), u128>);
+
+    i128 mixed{5};
+    mixed = mixed + 1;
+    assert(mixed == 6);
+    mixed = 1 + mixed;
+    assert(mixed == 7);
+    mixed = mixed - 2;
+    assert(mixed == 5);
+    mixed = 9 - mixed;
+    assert(mixed == 4);
+    mixed = mixed * 3;
+    assert(mixed == 12);
+    mixed = 2 * mixed;
+    assert(mixed == 24);
+    assert(mixed == 24);
+    assert(24 == mixed);
+    assert(mixed != 23);
+    assert(23 != mixed);
+    assert(mixed > 20);
+    assert(20 < mixed);
+    assert(mixed >= 24);
+    assert(24 <= mixed);
+
+    u128 mask{6u};
+    assert((mask & 3u) == u128{2u});
+    assert((3u & mask) == u128{2u});
+    assert((mask | 1u) == u128{7u});
+    assert((1u | mask) == u128{7u});
+    assert((mask ^ 3u) == u128{5u});
+    assert((3u ^ mask) == u128{5u});
+
     assert(wideint::countl_zero(std::uint64_t{0}) == 64);
     assert(wideint::countr_zero(std::uint64_t{0}) == 64);
     assert(wideint::popcount(std::uint64_t{0}) == 0);

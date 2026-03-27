@@ -41,7 +41,8 @@ WIDEINT_HD inline void copy_limbs(std::uint64_t (&dst)[N], const std::uint64_t (
 }
 
 template <std::size_t N>
-WIDEINT_HD inline int compare_unsigned(const std::uint64_t (&lhs)[N], const std::uint64_t (&rhs)[N]) {
+WIDEINT_HD inline int compare_unsigned(const std::uint64_t (&lhs)[N],
+                                       const std::uint64_t (&rhs)[N]) {
     for (std::size_t i = N; i-- > 0;) {
         if (lhs[i] < rhs[i]) {
             return -1;
@@ -177,7 +178,7 @@ WIDEINT_HD inline void shift_left_assign(std::uint64_t (&dst)[N], unsigned int s
 
 template <std::size_t N>
 WIDEINT_HD inline void shift_right_assign_fill(std::uint64_t (&dst)[N], unsigned int shift,
-                                            std::uint64_t fill) {
+                                               std::uint64_t fill) {
     constexpr unsigned int limb_bits = 64;
     const unsigned int total_bits = static_cast<unsigned int>(N * limb_bits);
     if (shift >= total_bits) {
@@ -349,12 +350,14 @@ template <std::size_t N, bool Signed> struct basic_int {
 };
 
 template <std::size_t N, bool Signed>
-WIDEINT_HD inline bool operator==(const basic_int<N, Signed> &lhs, const basic_int<N, Signed> &rhs) {
+WIDEINT_HD inline bool operator==(const basic_int<N, Signed> &lhs,
+                                  const basic_int<N, Signed> &rhs) {
     return compare_unsigned(lhs.limbs, rhs.limbs) == 0;
 }
 
 template <std::size_t N, bool Signed>
-WIDEINT_HD inline bool operator!=(const basic_int<N, Signed> &lhs, const basic_int<N, Signed> &rhs) {
+WIDEINT_HD inline bool operator!=(const basic_int<N, Signed> &lhs,
+                                  const basic_int<N, Signed> &rhs) {
     return !(lhs == rhs);
 }
 
@@ -364,7 +367,8 @@ WIDEINT_HD inline bool operator<(const basic_int<N, Signed> &lhs, const basic_in
 }
 
 template <std::size_t N, bool Signed>
-WIDEINT_HD inline bool operator<=(const basic_int<N, Signed> &lhs, const basic_int<N, Signed> &rhs) {
+WIDEINT_HD inline bool operator<=(const basic_int<N, Signed> &lhs,
+                                  const basic_int<N, Signed> &rhs) {
     return compare<Signed>(lhs.limbs, rhs.limbs) <= 0;
 }
 
@@ -374,48 +378,49 @@ WIDEINT_HD inline bool operator>(const basic_int<N, Signed> &lhs, const basic_in
 }
 
 template <std::size_t N, bool Signed>
-WIDEINT_HD inline bool operator>=(const basic_int<N, Signed> &lhs, const basic_int<N, Signed> &rhs) {
+WIDEINT_HD inline bool operator>=(const basic_int<N, Signed> &lhs,
+                                  const basic_int<N, Signed> &rhs) {
     return compare<Signed>(lhs.limbs, rhs.limbs) >= 0;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator+(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs += rhs;
     return lhs;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator-(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs -= rhs;
     return lhs;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator*(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs *= rhs;
     return lhs;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator&(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs &= rhs;
     return lhs;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator|(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs |= rhs;
     return lhs;
 }
 
 template <std::size_t N, bool Signed>
 WIDEINT_HD inline basic_int<N, Signed> operator^(basic_int<N, Signed> lhs,
-                                              const basic_int<N, Signed> &rhs) {
+                                                 const basic_int<N, Signed> &rhs) {
     lhs ^= rhs;
     return lhs;
 }
@@ -432,6 +437,125 @@ WIDEINT_HD inline basic_int<N, Signed> operator>>(basic_int<N, Signed> lhs, unsi
     return lhs;
 }
 
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator==(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs == basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator==(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} == rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator!=(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs != basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator!=(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} != rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator<(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs < basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator<(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} < rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator<=(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs <= basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator<=(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} <= rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator>(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs > basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator>(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} > rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator>=(const basic_int<N, Signed> &lhs, T rhs) {
+    return lhs >= basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline bool operator>=(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} >= rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator+(basic_int<N, Signed> lhs, T rhs) {
+    return lhs + basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator+(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} + rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator-(basic_int<N, Signed> lhs, T rhs) {
+    return lhs - basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator-(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} - rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator*(basic_int<N, Signed> lhs, T rhs) {
+    return lhs * basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator*(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} * rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator&(basic_int<N, Signed> lhs, T rhs) {
+    return lhs & basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator&(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} & rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator|(basic_int<N, Signed> lhs, T rhs) {
+    return lhs | basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator|(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} | rhs;
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator^(basic_int<N, Signed> lhs, T rhs) {
+    return lhs ^ basic_int<N, Signed>{rhs};
+}
+
+template <std::size_t N, bool Signed, class T, class = std::enable_if_t<is_integral_not_bool_v<T>>>
+WIDEINT_HD inline basic_int<N, Signed> operator^(T lhs, const basic_int<N, Signed> &rhs) {
+    return basic_int<N, Signed>{lhs} ^ rhs;
+}
 } // namespace detail
 
 template <std::size_t N> using uint = detail::basic_int<N, false>;
@@ -441,4 +565,3 @@ template <std::size_t N> using sint = detail::basic_int<N, true>;
 } // namespace wideint
 
 #endif // WIDEINT_WIDEINT_HPP
-

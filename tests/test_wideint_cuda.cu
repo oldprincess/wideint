@@ -6,6 +6,7 @@
 
 #include <cuda_runtime.h>
 
+#include "wideint/bit.hpp"
 #include "wideint/wideint.hpp"
 
 using u128 = wideint::uint<2>;
@@ -72,6 +73,43 @@ __global__ void run_wideint_cuda_tests(int *failures) {
     expect(alignof(i128) == alignof(std::uint64_t), failures);
     expect(offsetof(u128, limbs) == 0, failures);
     expect(offsetof(i128, limbs) == 0, failures);
+
+    expect(wideint::countl_zero(std::uint64_t{0}) == 64, failures);
+    expect(wideint::countr_zero(std::uint64_t{0}) == 64, failures);
+    expect(wideint::popcount(std::uint64_t{0}) == 0, failures);
+    expect(wideint::bit_width(std::uint64_t{0}) == 0, failures);
+    expect(!wideint::has_single_bit(std::uint64_t{0}), failures);
+    expect(wideint::countl_zero(std::uint64_t{1}) == 63, failures);
+    expect(wideint::countl_zero(std::uint64_t{1} << 63) == 0, failures);
+    expect(wideint::countr_zero(std::uint64_t{8}) == 3, failures);
+    expect(wideint::countr_zero(std::uint64_t{1} << 63) == 63, failures);
+    expect(wideint::popcount(std::uint64_t{0xf0}) == 4, failures);
+    expect(wideint::popcount(~std::uint64_t{0}) == 64, failures);
+    expect(wideint::bit_width(std::uint64_t{9}) == 4, failures);
+    expect(wideint::has_single_bit(std::uint64_t{8}), failures);
+
+    expect(wideint::countl_zero(zero) == 128, failures);
+    expect(wideint::countl_zero(one) == 127, failures);
+    expect(wideint::countl_zero(top_bit) == 63, failures);
+    expect(wideint::countr_zero(zero) == 128, failures);
+    expect(wideint::countr_zero(top_bit) == 64, failures);
+    expect(wideint::countr_zero(u128{8u}) == 3, failures);
+    expect(wideint::popcount(zero) == 0, failures);
+    expect(wideint::popcount(all_ones) == 128, failures);
+    expect(wideint::popcount(one_or_top) == 2, failures);
+    expect(wideint::bit_width(zero) == 0, failures);
+    expect(wideint::bit_width(one) == 1, failures);
+    expect(wideint::bit_width(top_bit) == 65, failures);
+    expect(wideint::has_single_bit(one), failures);
+    expect(wideint::has_single_bit(top_bit), failures);
+    expect(!wideint::has_single_bit(zero), failures);
+    expect(!wideint::has_single_bit(one_or_top), failures);
+
+    expect(wideint::countl_zero(i128{-1}) == 0, failures);
+    expect(wideint::countr_zero(i128{-2}) == 1, failures);
+    expect(wideint::popcount(i128{-1}) == 128, failures);
+    expect(wideint::bit_width(i128{-1}) == 128, failures);
+    expect(wideint::has_single_bit(i128{1}), failures);
 }
 
 void check_cuda(cudaError_t status) {

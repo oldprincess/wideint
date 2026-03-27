@@ -4,9 +4,9 @@
 #pragma once
 
 #if defined(__CUDACC__)
-#define INTX_HD __device__
+#define WIDEINT_HD __device__
 #else
-#define INTX_HD
+#define WIDEINT_HD
 #endif
 
 #endif // WIDEINT_DETAIL_COMMON_HPP

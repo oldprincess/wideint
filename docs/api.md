@@ -1,25 +1,30 @@
 # wideint API Reference
 
-[English](api.md) | [????](api.zh-CN.md)
-
 ## Overview
 
-`wideint` provides fixed-width integer templates built from 64-bit limbs.
+`wideint` provides fixed-width integer templates built from 64-bit limbs and a small set of C++20-style bit utilities.
 
 The public API is intentionally small:
 
 - unsigned integers via `wideint::uint<N>`
 - signed integers via `wideint::sint<N>`
 - integer-like arithmetic, bitwise operations, shifts, comparisons, and explicit integer conversions
+- bit utilities via `wideint::countl_zero`, `wideint::countr_zero`, `wideint::popcount`, `wideint::bit_width`, and `wideint::has_single_bit`
 
 `N` is the number of 64-bit limbs, so the total width is `64 * N` bits.
 
-## Header And Namespace
+## Headers And Namespace
 
-Include:
+Integer types and operators:
 
 ```cpp
 #include "wideint/wideint.hpp"
+```
+
+Bit utilities:
+
+```cpp
+#include "wideint/bit.hpp"
 ```
 
 Namespace:
@@ -184,6 +189,58 @@ Semantics:
   - zero for `uint<N>`
   - all zeros or all ones for `sint<N>`, depending on the sign
 
+## Bit Utilities
+
+`wideint/bit.hpp` provides C++20-style helpers for both `std::uint64_t` and `wideint::{u,s}int<N>` values. On host builds, the `std::uint64_t` helpers use compiler intrinsics or builtins when available on x86_64 and GCC/Clang toolchains.
+
+### `wideint::countl_zero(x)`
+
+Returns the number of leading zero bits.
+
+Semantics:
+
+- for `std::uint64_t`, `countl_zero(0) == 64`
+- for `wideint::uint<N>` and `wideint::sint<N>`, `countl_zero(0) == 64 * N`
+- for wide signed values, the function operates on the stored two's-complement bit pattern
+
+### `wideint::countr_zero(x)`
+
+Returns the number of trailing zero bits.
+
+Semantics:
+
+- for `std::uint64_t`, `countr_zero(0) == 64`
+- for `wideint::uint<N>` and `wideint::sint<N>`, `countr_zero(0) == 64 * N`
+- for wide signed values, the function operates on the stored two's-complement bit pattern
+
+### `wideint::popcount(x)`
+
+Returns the number of one bits in the value.
+
+Semantics:
+
+- `popcount(0) == 0`
+- for wide signed values, the function counts bits in the stored two's-complement representation
+
+### `wideint::bit_width(x)`
+
+Returns the number of bits needed to represent the value's current bit pattern without leading zeros.
+
+Semantics:
+
+- `bit_width(0) == 0`
+- for non-zero values, `bit_width(x) == total_bits - countl_zero(x)`
+- for wide signed values, the function measures the stored two's-complement bit pattern rather than a mathematical magnitude
+
+### `wideint::has_single_bit(x)`
+
+Returns `true` when exactly one bit is set.
+
+Semantics:
+
+- returns `false` for zero
+- for wide signed values, the function checks the stored two's-complement bit pattern
+
 ## Comparison Operators
 
 Supported comparisons:
@@ -221,6 +278,7 @@ Low-level helpers in `detail/platform_ops.hpp` select different implementations 
 - portable fallback path
 
 At the API level, the public integer semantics remain the same.
+The bit utilities in `wideint/bit.hpp` follow the same value semantics on host and CUDA builds.
 
 ## Current Limitations
 
@@ -231,7 +289,7 @@ The current public API does not yet provide:
 - parsing from strings
 - formatting to strings
 - stream operators
-- higher-level numeric utilities
+- higher-level numeric algorithms beyond the current arithmetic operators and bit utilities
 
 ## Stability Note
 

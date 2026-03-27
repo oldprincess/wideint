@@ -23,6 +23,7 @@ It stores integers as arrays of 64-bit limbs, keeps a simple memory layout, and 
 - Arithmetic operators: `+`, `-`, `*`, unary `-`, increment, decrement
 - Bitwise operators: `~`, `&`, `|`, `^`
 - Shift operators with logical right shift for `uint<N>` and arithmetic right shift for `sint<N>`
+- C++20-style bit utilities via `wideint::countl_zero`, `wideint::countr_zero`, `wideint::popcount`, `wideint::bit_width`, and `wideint::has_single_bit`, with host-side compiler intrinsic paths where available
 - Explicit conversion to built-in integer target types
 - Host/CUDA-aware low-level helpers for carry, borrow, and wide multiply
 
@@ -36,12 +37,14 @@ Current limitations:
 
 - no division or modulo yet
 - no parsing or formatting helpers yet
-- no high-level algorithms beyond the core integer operators
+- no stream operators yet
+- no higher-level numeric algorithms beyond the core integer operators and basic bit utilities
 - CUDA support is part of the design, but the host build is the primary verified path in this repository
 
 ## Quick Example
 
 ```cpp
+#include "wideint/bit.hpp"
 #include "wideint/wideint.hpp"
 
 using u128 = wideint::uint<2>;
@@ -55,7 +58,10 @@ int main() {
     const i128 neg_one{-1};
     const i128 shifted = neg_one >> 1;
 
-    return static_cast<int>(static_cast<std::uint64_t>(c) + static_cast<std::int64_t>(shifted));
+    const auto width = wideint::bit_width(c);
+    const auto bits = wideint::popcount(shifted);
+
+    return static_cast<int>(width + bits);
 }
 ```
 
@@ -73,13 +79,13 @@ CUDA tests are optional and controlled by `WIDEINT_BUILD_CUDA_TESTS`.
 
 ## Project Layout
 
-- `include/wideint/wideint.hpp`: public API
+- `include/wideint/wideint.hpp`: public fixed-width integer types and operators
+- `include/wideint/bit.hpp`: public C++20-style bit utility helpers
 - `include/wideint/detail/common.hpp`: compiler and annotation helpers
 - `include/wideint/detail/platform_ops.hpp`: low-level carry, borrow, and multiply primitives
 - `tests/test_wideint.cpp`: host-side tests
 - `tests/test_wideint_cuda.cu`: optional CUDA tests
 - `docs/api.md`: API reference and semantics
-- `docs/api.zh-CN.md`: Chinese API reference and semantics
 
 ## API Overview
 
@@ -88,6 +94,15 @@ The main public types are:
 - `wideint::uint<N>`: unsigned fixed-width integer with `N` 64-bit limbs
 - `wideint::sint<N>`: signed fixed-width integer with `N` 64-bit limbs
 
+The public bit utilities are:
+
+- `wideint::countl_zero`
+- `wideint::countr_zero`
+- `wideint::popcount`
+- `wideint::bit_width`
+- `wideint::has_single_bit`
+
+These helpers accept both `std::uint64_t` and `wideint::{u,s}int<N>` values.
 For the full API and semantic notes, see [docs/api.md](docs/api.md).
 
 ## Contributors

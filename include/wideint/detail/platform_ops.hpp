@@ -29,25 +29,25 @@ struct mul_result {
 };
 
 #if defined(__CUDA_ARCH__)
-INTX_HD inline add_result cuda_addc_u64(std::uint64_t a, std::uint64_t b) {
+WIDEINT_HD inline add_result cuda_addc_u64(std::uint64_t a, std::uint64_t b) {
     unsigned long long sum = 0;
     unsigned long long carry = 0;
-    asm volatile("add.cc.u64 %0, %2, %3;
-                 "
+    asm volatile("add.cc.u64 %0, %2, %3;\n\t"
                  "addc.u64 %1, 0, 0;"
                  : "=l"(sum), "=l"(carry)
                  : "l"(a), "l"(b));
     return {sum, carry};
 }
 
-INTX_HD inline sub_result cuda_subc_u64(std::uint64_t a, std::uint64_t b) {
+WIDEINT_HD inline sub_result cuda_subc_u64(std::uint64_t a, std::uint64_t b) {
     unsigned long long diff = 0;
     asm volatile("sub.u64 %0, %1, %2;" : "=l"(diff) : "l"(a), "l"(b));
     return {diff, a < b ? 1u : 0u};
 }
 #endif
 
-INTX_HD inline add_result add_carry_u64(std::uint64_t a, std::uint64_t b, std::uint64_t carry_in) {
+WIDEINT_HD inline add_result add_carry_u64(std::uint64_t a, std::uint64_t b,
+                                           std::uint64_t carry_in) {
 #if defined(__CUDA_ARCH__)
     const auto s0 = cuda_addc_u64(a, b);
     const auto s1 = cuda_addc_u64(s0.value, carry_in);
@@ -67,8 +67,8 @@ INTX_HD inline add_result add_carry_u64(std::uint64_t a, std::uint64_t b, std::u
 #endif
 }
 
-INTX_HD inline sub_result sub_borrow_u64(std::uint64_t a, std::uint64_t b,
-                                         std::uint64_t borrow_in) {
+WIDEINT_HD inline sub_result sub_borrow_u64(std::uint64_t a, std::uint64_t b,
+                                            std::uint64_t borrow_in) {
 #if defined(__CUDA_ARCH__)
     const auto d0 = cuda_subc_u64(a, b);
     const auto d1 = cuda_subc_u64(d0.value, borrow_in);
@@ -88,10 +88,10 @@ INTX_HD inline sub_result sub_borrow_u64(std::uint64_t a, std::uint64_t b,
 #endif
 }
 
-INTX_HD inline mul_result mul_wide_u64(std::uint64_t a, std::uint64_t b) {
+WIDEINT_HD inline mul_result mul_wide_u64(std::uint64_t a, std::uint64_t b) {
 #if defined(__CUDA_ARCH__)
     return {a * b, __umul64hi(a, b)};
-#elif defined(_MSC_VER) && defined(_M_X64)
+#elif !defined(__CUDACC__) && defined(_MSC_VER) && defined(_M_X64)
     unsigned __int64 hi = 0;
 #if defined(__BMI2__)
     const unsigned __int64 lo =

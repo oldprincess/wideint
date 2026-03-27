@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <type_traits>
 
+#include "wideint/bit.hpp"
 #include "wideint/wideint.hpp"
 
 using u128 = wideint::uint<2>;
@@ -78,6 +79,43 @@ int main() {
     assert(static_cast<std::int64_t>(u128{0x1234u, 0x5678u}) == 0x1234u);
     assert(static_cast<std::uint64_t>(i128{-1}) == ~0ull);
     assert(static_cast<std::int64_t>(i128{-1}) == -1);
+
+    assert(wideint::countl_zero(std::uint64_t{0}) == 64);
+    assert(wideint::countr_zero(std::uint64_t{0}) == 64);
+    assert(wideint::popcount(std::uint64_t{0}) == 0);
+    assert(wideint::bit_width(std::uint64_t{0}) == 0);
+    assert(!wideint::has_single_bit(std::uint64_t{0}));
+    assert(wideint::countl_zero(std::uint64_t{1}) == 63);
+    assert(wideint::countl_zero(std::uint64_t{1} << 63) == 0);
+    assert(wideint::countr_zero(std::uint64_t{8}) == 3);
+    assert(wideint::countr_zero(std::uint64_t{1} << 63) == 63);
+    assert(wideint::popcount(std::uint64_t{0xf0}) == 4);
+    assert(wideint::popcount(~std::uint64_t{0}) == 64);
+    assert(wideint::bit_width(std::uint64_t{9}) == 4);
+    assert(wideint::has_single_bit(std::uint64_t{8}));
+
+    assert(wideint::countl_zero(zero) == 128);
+    assert(wideint::countl_zero(one) == 127);
+    assert(wideint::countl_zero(top_bit) == 63);
+    assert(wideint::countr_zero(zero) == 128);
+    assert(wideint::countr_zero(top_bit) == 64);
+    assert(wideint::countr_zero(u128{8u}) == 3);
+    assert(wideint::popcount(zero) == 0);
+    assert(wideint::popcount(all_ones) == 128);
+    assert(wideint::popcount(one_or_top) == 2);
+    assert(wideint::bit_width(zero) == 0);
+    assert(wideint::bit_width(one) == 1);
+    assert(wideint::bit_width(top_bit) == 65);
+    assert(wideint::has_single_bit(one));
+    assert(wideint::has_single_bit(top_bit));
+    assert(!wideint::has_single_bit(zero));
+    assert(!wideint::has_single_bit(one_or_top));
+
+    assert(wideint::countl_zero(i128{-1}) == 0);
+    assert(wideint::countr_zero(i128{-2}) == 1);
+    assert(wideint::popcount(i128{-1}) == 128);
+    assert(wideint::bit_width(i128{-1}) == 128);
+    assert(wideint::has_single_bit(i128{1}));
 
     return 0;
 }

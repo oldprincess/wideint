@@ -75,17 +75,9 @@ int main() {
 本项目使用 CMake：
 
 ```bash
-cmake -S . -B build
+cmake -S . -B build -DWIDEINT_BUILD_TESTS=ON -DWIDEINT_BUILD_CUDA_TESTS=ON
 cmake --build build --config Debug
 ctest --test-dir build -C Debug --output-on-failure
-```
-
-启用 CUDA 测试：
-
-```bash
-cmake -S . -B build_cuda -DWIDEINT_BUILD_CUDA_TESTS=ON
-cmake --build build_cuda --config Debug
-ctest --test-dir build_cuda -C Debug --output-on-failure
 ```
 
 ## 项目结构

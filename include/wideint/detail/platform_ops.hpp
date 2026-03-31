@@ -8,7 +8,15 @@
 #include "common.hpp"
 
 #if !defined(__CUDACC__)
+#include <immintrin.h>
+
+#if defined(_MSC_VER)
 #include <intrin.h>
+#else
+#define _mulx_u64(a, b, c) _mulx_u64(a, b, (long long unsigned int *)c)
+#define _addcarry_u64(a, b, c, d) _addcarry_u64(a, b, c, (long long unsigned int *)d)
+#define _subborrow_u64(a, b, c, d) _subborrow_u64(a, b, c, (long long unsigned int *)d)
+#endif
 #endif
 
 namespace wideint::detail {

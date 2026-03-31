@@ -70,7 +70,7 @@ int main() {
 This repository uses CMake.
 
 ```bash
-cmake -S . -B build
+cmake -S . -B build -DWIDEINT_BUILD_TESTS=ON -DWIDEINT_BUILD_CUDA_TESTS=ON
 cmake --build build --config Debug
 ctest --test-dir build -C Debug --output-on-failure
 ```

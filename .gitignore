@@ -1,12 +1,3 @@
 build/
-Testing/
-
-CMakeCache.txt
-cmake_install.cmake
-
-.vs/
-*.vcxproj.user
-
 *.exe
-
-docs/superpowers/
+.vscode/

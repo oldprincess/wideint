@@ -10,7 +10,7 @@
 #include <intrin.h>
 #endif
 
-#include "wideint/wideint.hpp"
+#include <wideint/int.hpp>
 
 namespace wideint {
 namespace detail {

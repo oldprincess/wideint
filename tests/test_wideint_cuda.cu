@@ -6,8 +6,8 @@
 
 #include <cuda_runtime.h>
 
-#include "wideint/bit.hpp"
-#include "wideint/wideint.hpp"
+#include <wideint/bit.hpp>
+#include <wideint/wideint.hpp>
 
 using u128 = wideint::uint<2>;
 using i128 = wideint::sint<2>;

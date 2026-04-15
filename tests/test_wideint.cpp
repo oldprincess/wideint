@@ -1,12 +1,18 @@
 #include <cassert>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
-#include "wideint/bit.hpp"
-#include "wideint/wideint.hpp"
+#include <wideint/bit.hpp>
+#include <wideint/wideint.hpp>
 
 using u128 = wideint::uint<2>;
 using i128 = wideint::sint<2>;
+
+// numeric_limits uses constexpr limb filling (no wideint intrinsics); verify limb pattern only.
+static_assert(std::numeric_limits<u128>::max().limbs[0] == ~0ull &&
+              std::numeric_limits<u128>::max().limbs[1] == ~0ull);
+static_assert(std::numeric_limits<i128>::min().limbs[0] == 0 && std::numeric_limits<i128>::min().limbs[1] == 0x8000000000000000ull);
 
 static_assert(sizeof(u128) == 16, "uint<2> must occupy two 64-bit limbs");
 static_assert(sizeof(i128) == 16, "sint<2> must occupy two 64-bit limbs");

@@ -38,7 +38,8 @@ WIDEINT_HD inline void copy_limbs(std::uint64_t (&dst)[N], const std::uint64_t (
 }
 
 template <std::size_t N>
-WIDEINT_HD inline int compare_unsigned(const std::uint64_t (&lhs)[N], const std::uint64_t (&rhs)[N]) {
+WIDEINT_HD inline int compare_unsigned(const std::uint64_t (&lhs)[N],
+                                       const std::uint64_t (&rhs)[N]) {
     for (std::size_t i = N; i-- > 0;) {
         if (lhs[i] < rhs[i]) {
             return -1;
@@ -224,6 +225,28 @@ WIDEINT_HD inline void assign_limbs(std::uint64_t (&dst)[N], Args... args) {
     }
 }
 
+/** Resize limb array like C++ integer conversion: narrow keeps low limbs; widen uses sign
+ *  extension when SrcSigned, otherwise zero extension. */
+template <std::size_t DstN, std::size_t SrcN, bool SrcSigned>
+WIDEINT_HD inline void convert_basic_int_limbs(std::uint64_t (&dst)[DstN],
+                                               const std::uint64_t (&src)[SrcN]) {
+    constexpr std::size_t copy_n = DstN < SrcN ? DstN : SrcN;
+    for (std::size_t i = 0; i < copy_n; ++i) {
+        dst[i] = src[i];
+    }
+    if constexpr (DstN > SrcN) {
+        std::uint64_t fill = 0;
+        if constexpr (SrcSigned) {
+            if ((src[SrcN - 1] >> 63) != 0) {
+                fill = ~std::uint64_t{0};
+            }
+        }
+        for (std::size_t i = SrcN; i < DstN; ++i) {
+            dst[i] = fill;
+        }
+    }
+}
+
 template <bool Signed, std::size_t N>
 WIDEINT_HD inline int compare(const std::uint64_t (&lhs)[N], const std::uint64_t (&rhs)[N]) {
     if constexpr (Signed) {
@@ -249,7 +272,7 @@ WIDEINT_HD inline void set_bit(std::uint64_t (&dst)[N], unsigned int bit_index) 
 
 template <std::size_t N>
 WIDEINT_HD inline void unsigned_div_rem(std::uint64_t (&q)[N], std::uint64_t (&r)[N],
-                                         const std::uint64_t (&u)[N], const std::uint64_t (&v)[N]) {
+                                        const std::uint64_t (&u)[N], const std::uint64_t (&v)[N]) {
     zero_limbs(q);
     if (is_zero(v)) {
         return;

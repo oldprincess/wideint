@@ -8,11 +8,23 @@
 
 using u128 = wideint::uint<2>;
 using i128 = wideint::sint<2>;
+using u256 = wideint::uint<4>;
+using i256 = wideint::sint<4>;
+
+static_assert(std::is_constructible_v<u256, u128>);
+static_assert(std::is_constructible_v<u128, u256>);
+static_assert(std::is_constructible_v<i256, i128>);
+static_assert(std::is_constructible_v<i128, i256>);
+static_assert(std::is_constructible_v<u128, i128>);
+static_assert(std::is_constructible_v<i128, u128>);
+static_assert(std::is_constructible_v<u256, i128>);
+static_assert(std::is_constructible_v<i256, u128>);
 
 // numeric_limits uses constexpr limb filling (no wideint intrinsics); verify limb pattern only.
 static_assert(std::numeric_limits<u128>::max().limbs[0] == ~0ull &&
               std::numeric_limits<u128>::max().limbs[1] == ~0ull);
-static_assert(std::numeric_limits<i128>::min().limbs[0] == 0 && std::numeric_limits<i128>::min().limbs[1] == 0x8000000000000000ull);
+static_assert(std::numeric_limits<i128>::min().limbs[0] == 0 &&
+              std::numeric_limits<i128>::min().limbs[1] == 0x8000000000000000ull);
 
 static_assert(sizeof(u128) == 16, "uint<2> must occupy two 64-bit limbs");
 static_assert(sizeof(i128) == 16, "sint<2> must occupy two 64-bit limbs");
@@ -165,6 +177,29 @@ int main() {
     assert(wideint::popcount(i128{-1}) == 128);
     assert(wideint::bit_width(i128{-1}) == 128);
     assert(wideint::has_single_bit(i128{1}));
+
+    const u256 widened_u = u128{0xdeadbeefcafebabeull, 0x0123456789abcdefull};
+    assert(widened_u.limbs[0] == 0xdeadbeefcafebabeull);
+    assert(widened_u.limbs[1] == 0x0123456789abcdefull);
+    assert(widened_u.limbs[2] == 0 && widened_u.limbs[3] == 0);
+
+    const u128 narrow_u = u256{1u, 2u, 3u, 4u};
+    assert(narrow_u.limbs[0] == 1 && narrow_u.limbs[1] == 2);
+
+    const u256 from_neg_i = i128{-1};
+    assert(from_neg_i.limbs[0] == ~0ull && from_neg_i.limbs[1] == ~0ull &&
+           from_neg_i.limbs[2] == ~0ull && from_neg_i.limbs[3] == ~0ull);
+
+    const i128 from_all_ones_u = all_ones;
+    assert(from_all_ones_u == i128{-1});
+
+    const i256 i_widen = i128{-5};
+    const i128 narrow_i = i256{i_widen};
+    assert(narrow_i == i128{-5});
+
+    u256 assign_u{};
+    assign_u = u128{7u, 8u};
+    assert(assign_u.limbs[0] == 7 && assign_u.limbs[1] == 8 && assign_u.limbs[2] == 0);
 
     return 0;
 }

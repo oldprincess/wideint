@@ -23,12 +23,25 @@ template <std::size_t N, bool Signed> struct basic_int {
         assign_integral<N>(limbs, value);
     }
 
-    template <class T0, class T1, class... Ts,
-              class = std::enable_if_t<(is_integral_not_bool_v<T0> && is_integral_not_bool_v<T1> &&
-                                        (... && is_integral_not_bool_v<Ts>) &&
-                                        (2 + sizeof...(Ts) <= N))>>
+    template <
+        class T0, class T1, class... Ts,
+        class = std::enable_if_t<(is_integral_not_bool_v<T0> && is_integral_not_bool_v<T1> &&
+                                  (... && is_integral_not_bool_v<Ts>)&&(2 + sizeof...(Ts) <= N))>>
     WIDEINT_HD basic_int(T0 v0, T1 v1, Ts... vs) {
         assign_limbs<N>(limbs, v0, v1, vs...);
+    }
+
+    template <std::size_t OtherN, bool OtherSigned,
+              class = std::enable_if_t<OtherN != N || OtherSigned != Signed>>
+    WIDEINT_HD basic_int(const basic_int<OtherN, OtherSigned> &other) {
+        convert_basic_int_limbs<N, OtherN, OtherSigned>(limbs, other.limbs);
+    }
+
+    template <std::size_t OtherN, bool OtherSigned,
+              class = std::enable_if_t<OtherN != N || OtherSigned != Signed>>
+    WIDEINT_HD basic_int &operator=(const basic_int<OtherN, OtherSigned> &other) {
+        convert_basic_int_limbs<N, OtherN, OtherSigned>(limbs, other.limbs);
+        return *this;
     }
 
     WIDEINT_HD explicit operator bool() const { return !is_zero(limbs); }
